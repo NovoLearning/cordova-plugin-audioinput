@@ -56,8 +56,8 @@
         <framework src="CoreAudio.framework" weak="true" />
         <framework src="AudioToolbox.framework" weak="true" />
         <framework src="AVFoundation.framework" weak="true" />
-        <framework src="Ogg.framework" custom="true" />
-        <framework src="Speex.framework" custom="true" />
+        <framework src="src/ios/Ogg.framework" custom="true" />
+        <framework src="src/ios/Speex.framework" custom="true" />
 
     </platform>
 
