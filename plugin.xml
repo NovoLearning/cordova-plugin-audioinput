@@ -48,11 +48,16 @@
         <source-file src="src/ios/CDVAudioInputCapture.m" />
         <source-file src="src/ios/AudioReceiver.h" />
         <source-file src="src/ios/AudioReceiver.m" />
+        <source-file src="src/ios/SpeexEncoder.h" />
+        <source-file src="src/ios/SpeexEncoder.m" />
+
 
         <framework src="Accelerate.framework" weak="true" />
         <framework src="CoreAudio.framework" weak="true" />
         <framework src="AudioToolbox.framework" weak="true" />
         <framework src="AVFoundation.framework" weak="true" />
+        <framework src="Ogg.framework" custom="true" />
+        <framework src="Speex.framework" custom="true" />
 
     </platform>
 
