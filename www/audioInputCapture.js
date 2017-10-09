@@ -1,3 +1,4 @@
+cordova.define("cordova-plugin-audioinput.AudioInput", function(require, exports, module) {
 var argscheck = require('cordova/argscheck'),
     utils = require('cordova/utils'),
     exec = require('cordova/exec'),
@@ -212,15 +213,31 @@ audioinput._webAudioAPISupported = false;
 audioinput._audioInputEvent = function (audioInputData) {
     try {
         if (audioInputData && audioInputData.data && audioInputData.data.length > 0) {
-            var audioData = JSON.parse(audioInputData.data);
-            audioData = audioinput._normalizeAudio(audioData);
+           if (audioInputData.type == null || audioInputData.type == 'raw') {
+               var audioData = JSON.parse(audioInputData.data);
+               audioData = audioinput._normalizeAudio(audioData);
+               if (audioinput._cfg.streamToWebAudio && audioinput._capturing) {
+                   audioinput._enqueueAudioData(audioData);
+               }
+               else {
+                   cordova.fireWindowEvent("audioinput", {data: audioData, type: 'raw', codec: 'pcm'});
+               }
+           }
+           else {
+               // Assume encoded audio is sent in base64 format
+               var audioData = audioInputData.data;
+               if (audioinput._cfg.streamToWebAudio && audioinput._capturing) {
+                   throw "Encoded data cannot be streamed to web audio"
+               }
+               else {
+                   cordova.fireWindowEvent("audioinput", {
+                       data: audioData,
+                       type: audioData.type,
+                       codec: audioData.codec
+                   });
+               }
+           }
 
-            if (audioinput._cfg.streamToWebAudio && audioinput._capturing) {
-                audioinput._enqueueAudioData(audioData);
-            }
-            else {
-                cordova.fireWindowEvent("audioinput", {data: audioData});
-            }
         }
         else if (audioInputData && audioInputData.error) {
             audioinput._audioInputErrorEvent(audioInputData.error);
@@ -385,3 +402,5 @@ audioinput._dequeueAudioData = function () {
 };
 
 module.exports = audioinput;
+
+});

@@ -8,7 +8,6 @@
 
 #import "AudioReceiver.h"
 
-
 /**
     Audio Input callback
  */
@@ -64,12 +63,12 @@ void HandleInputBuffer(void* inUserData,
         AVAudioSession* avSession = [AVAudioSession sharedInstance];
 
         NSError *setCategoryError = nil;
-        if (![avSession setCategory:AVAudioSessionCategoryPlayAndRecord
+        if (![avSession setCategory:AVAudioSessionCategoryMultiRoute
          withOptions:AVAudioSessionCategoryOptionMixWithOthers
          error:&setCategoryError]) {
             // handle error?
         }
-
+        
         if(audioSourceType == 7) {
             [avSession setMode:AVAudioSessionModeVoiceChat error:nil];
         }
@@ -107,6 +106,10 @@ void HandleInputBuffer(void* inUserData,
     Start Audio Input capture
  */
 - (void)start {
+    NSError *encodingError;
+    self.spxEncoder = [SpeexEncoder encoderWithMode:speex_wb_mode quality:8 outputSampleRate:SAMPLE_RATE_16000_HZ];
+    NSData* header = [self.spxEncoder startEncoding:SAMPLE_RATE_16000_HZ error:&encodingError];
+    [self.delegate didReceiveEncodedAudioData:header];
     [self startRecording];
 }
 
@@ -144,8 +147,8 @@ void HandleInputBuffer(void* inUserData,
  */
 - (void)stop {
     if (_recordState.mIsRunning) {
-        AudioQueueStop(_recordState.mQueue, true);
         _recordState.mIsRunning = false;
+        AudioQueueStop(_recordState.mQueue, true);
     }
 }
 
@@ -170,7 +173,11 @@ void HandleInputBuffer(void* inUserData,
     Forward sample data
  */
 - (void)didReceiveAudioData:(short*)samples dataLength:(int)length {
-    [self.delegate didReceiveAudioData:samples dataLength:length];
+    if (_recordState.mIsRunning) {
+        NSError *encodingError;
+        NSData* packet = [self.spxEncoder encodeAudio:samples nrSamples:length sr:SAMPLE_RATE_16000_HZ error:&encodingError];
+        [self.delegate didReceiveEncodedAudioData:packet];
+    }
 }
 
 

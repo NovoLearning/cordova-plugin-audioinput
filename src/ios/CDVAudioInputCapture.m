@@ -74,6 +74,31 @@
     }];
 }
 
+- (void)didReceiveEncodedAudioData:(NSData*)data;
+{
+    [self.commandDelegate runInBackground:^{
+        @try {
+            NSString* dataStr = [data base64EncodedStringWithOptions:0];
+            NSMutableDictionary* audioData = [NSMutableDictionary dictionaryWithObject:[NSString stringWithString:dataStr] forKey:@"data"];
+            [audioData setValue:@"ogg" forKey:@"type"];
+            [audioData setValue:@"speex" forKey:@"codec"];
+            
+            if (self.callbackId) {
+                CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:audioData];
+                [result setKeepCallbackAsBool:YES];
+                [self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
+            }
+        }
+        @catch (NSException *exception) {
+            if (self.callbackId) {
+                CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                            messageAsString:@"Exception in didReceiveEncodedAudioData"];
+                [result setKeepCallbackAsBool:YES];
+                [self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
+            }
+        }
+    }];
+}
 
 - (void)didReceiveAudioData:(short*)data dataLength:(int)length
 {
@@ -92,7 +117,9 @@
 
                 NSString *str = [mutableArray componentsJoinedByString:@","];
                 NSString *dataStr = [NSString stringWithFormat:@"[%@]", str];
-                NSDictionary* audioData = [NSDictionary dictionaryWithObject:[NSString stringWithString:dataStr] forKey:@"data"];
+                NSMutableDictionary* audioData = [NSMutableDictionary dictionaryWithObject:[NSString stringWithString:dataStr] forKey:@"data"];
+                [audioData setValue:@"raw" forKey:@"type"];
+                [audioData setValue:@"pcm" forKey:@"codec"];
 
                 if (self.callbackId) {
                     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:audioData];

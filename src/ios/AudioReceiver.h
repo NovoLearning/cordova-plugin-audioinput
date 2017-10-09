@@ -12,6 +12,7 @@
 #include <limits.h>
 #include <Accelerate/Accelerate.h>
 #include <CoreFoundation/CFRunLoop.h>
+#include "SpeexEncoder.h";
 
 #define kNumberBuffers 10
 
@@ -37,6 +38,8 @@ typedef struct {
     @property (nonatomic) short myChannels;
     @property (nonatomic) short myBitRate;
     @property (nonatomic) NSString* myFormat;
+    @property (nonatomic) SpeexEncoder* spxEncoder;
+
 
 - (void)start;
 - (void)stop;
@@ -52,6 +55,7 @@ typedef struct {
 @protocol AudioReceiverProtocol
 
 - (void)didReceiveAudioData:(short*)data dataLength:(int)length;
+- (void)didReceiveEncodedAudioData:(NSData*)data;
 - (void)didEncounterError:(NSString*)msg;
 
 @end
