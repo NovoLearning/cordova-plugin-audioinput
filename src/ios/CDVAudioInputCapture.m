@@ -189,7 +189,7 @@
 
 - (void)willEnterForeground
 {
-    [self.audioReceiver start];
+//    [self.audioReceiver start];
 }
 
 @end
