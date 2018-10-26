@@ -78,13 +78,8 @@
 {
     [self.commandDelegate runInBackground:^{
         @try {
-            NSString* dataStr = [data base64EncodedStringWithOptions:0];
-            NSMutableDictionary* audioData = [NSMutableDictionary dictionaryWithObject:[NSString stringWithString:dataStr] forKey:@"data"];
-            [audioData setValue:@"ogg" forKey:@"type"];
-            [audioData setValue:@"speex" forKey:@"codec"];
-            
             if (self.callbackId) {
-                CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:audioData];
+                CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArrayBuffer:data];
                 [result setKeepCallbackAsBool:YES];
                 [self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
             }

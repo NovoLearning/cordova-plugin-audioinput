@@ -105,10 +105,10 @@ audioinput.start = function (cfg) {
 
         exec(audioinput._audioInputEvent, audioinput._audioInputErrorEvent, "AudioInputCapture", "start",
             [audioinput._cfg.sampleRate,
-             audioinput._cfg.bufferSize,
-             audioinput._cfg.channels,
-             audioinput._cfg.format,
-             audioinput._cfg.audioSourceType]);
+            audioinput._cfg.bufferSize,
+            audioinput._cfg.channels,
+            audioinput._cfg.format,
+            audioinput._cfg.audioSourceType]);
 
         audioinput._capturing = true;
 
@@ -211,34 +211,11 @@ audioinput._webAudioAPISupported = false;
  */
 audioinput._audioInputEvent = function (audioInputData) {
     try {
-        if (audioInputData && audioInputData.data && audioInputData.data.length > 0) {
-           if (audioInputData.type == null || audioInputData.type == 'raw') {
-               var audioData = JSON.parse(audioInputData.data);
-               audioData = audioinput._normalizeAudio(audioData);
-               if (audioinput._cfg.streamToWebAudio && audioinput._capturing) {
-                   audioinput._enqueueAudioData(audioData);
-               }
-               else {
-                   cordova.fireWindowEvent("audioinput", {data: audioData, type: 'raw', codec: 'pcm'});
-               }
-           }
-           else {
-               // Assume encoded audio is sent in base64 format
-               var audioData = audioInputData.data;
-               if (audioinput._cfg.streamToWebAudio && audioinput._capturing) {
-                   throw "Encoded data cannot be streamed to web audio"
-               }
-               else {
-                   cordova.fireWindowEvent("audioinput", {
-                       data: audioData,
-                       type: audioData.type,
-                       codec: audioData.codec
-                   });
-               }
-           }
-
-        }
-        else if (audioInputData && audioInputData.error) {
+        if (audioInputData && audioInputData.byteLength > 0) {
+            cordova.fireWindowEvent("audioinput", {
+                data: audioInputData
+            });
+        } else if (audioInputData && audioInputData.error) {
             audioinput._audioInputErrorEvent(audioInputData.error);
         }
     }
@@ -253,7 +230,7 @@ audioinput._audioInputEvent = function (audioInputData) {
  */
 
 audioinput._audioInputErrorEvent = function (e) {
-    cordova.fireWindowEvent("audioinputerror", {message: e});
+    cordova.fireWindowEvent("audioinputerror", { message: e });
 };
 
 /**
